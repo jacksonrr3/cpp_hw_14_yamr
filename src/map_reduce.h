@@ -98,7 +98,7 @@ private:
 					for (auto& v : thread_res) {
 						std::cout << v << std::endl;
 					}
-				std::cout << endl;
+				std::cout << std::endl;
 				console_m.unlock();
 				
 				vector_m.lock();
@@ -146,7 +146,7 @@ private:
 					for (auto & v : shuffle_res_[i]){
 						std::cout << v << std::endl;
 					}
-					std::cout << endl;
+					std::cout << std::endl;
 					console_m.unlock();
 				}
 				

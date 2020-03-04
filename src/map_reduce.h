@@ -71,7 +71,7 @@ private:
 			}
 		}
 		in_file.close();
-		return std::move(offsets);
+		return offsets;
 	}
 
 	void map(std::vector<std::size_t> off, std::function<vec_str(const std::string&)> f) {
@@ -88,7 +88,7 @@ private:
 					std::string str;
 					std::getline(file, str);
 					from += str.size() + 2;
-					auto v(std::move(f(str)));
+					auto v(f(str));
 					thread_res.insert(v.begin(), v.end());
 				}
 				file.close();

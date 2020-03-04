@@ -34,8 +34,9 @@ int main(int args, char * argv[]) {
 	int mnum = std::atoi(argv[2]);
 	int rnum = std::atoi(argv[3]);
 	
-	if (!mnum || !rnum) {
-		std::cerr << "Количество потоков должно быть не меньше 1." << std::endl;
+	std::ifstream test(str);
+	if (!mnum || !rnum || test.fail()) {
+		std::cerr << "Data err!" << std::endl;
         	return EXIT_FAILURE;	
 	}
 	

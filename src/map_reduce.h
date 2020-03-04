@@ -141,7 +141,7 @@ private:
 				
 				{	
 					console_m.lock();
-					std::cout << endl;
+					std::cout << std::endl;
 					std::cout << "R контейнер " << i << std::endl;
 					for (auto & v : shuffle_res_[i]){
 						std::cout << v << std::endl;

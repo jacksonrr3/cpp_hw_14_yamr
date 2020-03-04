@@ -98,6 +98,7 @@ private:
 					for (auto& v : thread_res) {
 						std::cout << v << std::endl;
 					}
+				std::cout << endl;
 				console_m.unlock();
 				
 				vector_m.lock();
@@ -138,10 +139,15 @@ private:
 		for (std::size_t i = 0; i < r_threads_; i++) {
 			vtr.push_back(std::thread([this, i, f]() {
 				
-				if (!i) {
+				{	
+					console_m.lock();
+					std::cout << endl;
+					std::cout << "R контейнер " << i << std::endl;
 					for (auto & v : shuffle_res_[i]){
 						std::cout << v << std::endl;
 					}
+					std::cout << endl;
+					console_m.unlock();
 				}
 				
 				

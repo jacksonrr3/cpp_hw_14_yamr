@@ -129,6 +129,14 @@ private:
 		vec_thr vtr;
 		for (std::size_t i = 0; i < r_threads_; i++) {
 			vtr.push_back(std::thread([this, i, f]() {
+				
+				if (!i) {
+					for (auto & v : shuffle_res_[i]){
+						std::cout << v << std::endl;
+					}
+				}
+				
+				
 				vec_str red_res{ f(shuffle_res_[i]) };
 				std::string file_name = "R" + std::to_string(i) + "_" + std::to_string(file_id++) + ".txt";
 				std::ofstream out_file;

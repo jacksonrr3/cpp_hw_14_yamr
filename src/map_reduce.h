@@ -92,7 +92,7 @@ private:
 					thread_res.insert(v.begin(), v.end());
 				}
 				file.close();
-				
+				/* //вывод информации для отладки
 				console_m.lock();
 					std::cout << "Thread has done map:" << std::endl;
 					for (auto& v : thread_res) {
@@ -100,7 +100,7 @@ private:
 					}
 				std::cout << std::endl;
 				console_m.unlock();
-				
+				*/
 				vector_m.lock();
 				map_res_.push_back(std::move(thread_res));
 				vector_m.unlock();
@@ -138,7 +138,7 @@ private:
 		vec_thr vtr;
 		for (std::size_t i = 0; i < r_threads_; i++) {
 			vtr.push_back(std::thread([this, i, f]() {
-				
+				/* //вывод информации для отладки
 				{	
 					console_m.lock();
 					std::cout << std::endl;
@@ -149,7 +149,7 @@ private:
 					std::cout << std::endl;
 					console_m.unlock();
 				}
-				
+				*/
 				
 				vec_str red_res{ f(shuffle_res_[i]) };
 				std::string file_name = "R" + std::to_string(i) + "_" + std::to_string(file_id++) + ".txt";

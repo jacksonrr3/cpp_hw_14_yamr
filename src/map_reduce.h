@@ -92,6 +92,13 @@ private:
 					thread_res.insert(v.begin(), v.end());
 				}
 				file.close();
+				
+				console_m.lock();
+					std::cout << "Thread has done map:" << std::endl;
+					for (auto& v : thread_res) {
+						std::cout << v << std::endl;
+					}
+				
 				vector_m.lock();
 				map_res_.push_back(std::move(thread_res));
 				vector_m.unlock();

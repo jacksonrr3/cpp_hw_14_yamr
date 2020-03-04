@@ -82,7 +82,7 @@ private:
 				file.open(file_path_);
 				file.seekg(from, file.beg);
 				char c = file.peek();
-				if (c == '\n') { ++from; file.seekg(from, file.beg); }   // проверка на символ перевода строки
+				if (c == '\n') { ++from; file.seekg(from, file.beg); }   
 				set_str thread_res;
 				while (from < to) {
 					std::string str;

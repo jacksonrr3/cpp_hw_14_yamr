@@ -98,6 +98,7 @@ private:
 					for (auto& v : thread_res) {
 						std::cout << v << std::endl;
 					}
+				console_m.unlock();
 				
 				vector_m.lock();
 				map_res_.push_back(std::move(thread_res));

@@ -13,20 +13,20 @@ std::function<vec_str(set_str&)> reduce_func = [](set_str& set) {
 		auto second = set.begin();
 		++second;
 		while (second != set.end()) {
-			auto diff = std::distance(first->begin(), 
+			int diff = std::distance(first->begin(), 
 				std::mismatch(first->begin(), first->end(), second->begin(), second->end()).first) + 1;
 			pref = std::max(pref, diff);
 			++first;
 			++second;
 		}
 	}
-	return std::move(vec_str{std::to_string(pref)});
+	return vec_str{std::to_string(pref)};
 };
 
 
 int main(int args, char * argv[]) {
 	
-	if (argc != 4) {
+	if (args != 4) {
         	std::cerr << "Порядок запуска - # yamr <src> <mnum> <rnum>\n" << std::endl;
         	return EXIT_FAILURE;
     	}
@@ -34,7 +34,7 @@ int main(int args, char * argv[]) {
 	int mnum = std::atoi(argv[2]);
 	int rnum = std::atoi(argv[3]);
 	
-	std::ifstream test(str);
+	std::ifstream test(src);
 	if (!mnum || !rnum || test.fail()) {
 		std::cerr << "Data err!" << std::endl;
         	return EXIT_FAILURE;	

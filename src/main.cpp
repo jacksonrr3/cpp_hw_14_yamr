@@ -23,9 +23,23 @@ std::function<vec_str(set_str&)> reduce_func = [](set_str& set) {
 	return std::move(vec_str{std::to_string(pref)});
 };
 
-int main(int args, char * argv[]) {
 
-	MapReduce m(6, 5, "C:\\test\\mail.txt");
+int main(int args, char * argv[]) {
+	
+	if (argc != 4) {
+        	std::cerr << "Порядок запуска - # yamr <src> <mnum> <rnum>\n" << std::endl;
+        	return EXIT_FAILURE;
+    	}
+	std::string src = argv[1];
+	int mnum = std::atoi(argv[2]);
+	int rnum = std::atoi(argv[3]);
+	
+	if (!mnum || !rnum) {
+		std::cerr << "Количество потоков должно быть не меньше 1." << std::endl;
+        	return EXIT_FAILURE;	
+	}
+	
+	MapReduce m(mnum, rnum, src);
 
 	m.run(map_func, reduce_func);
 

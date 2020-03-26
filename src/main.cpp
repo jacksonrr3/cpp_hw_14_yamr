@@ -14,7 +14,7 @@ std::function<vec_str(const std::string&)> map_func = [](std::string s) {
 };
 
 
-//пока оставил, как временную заглушку.
+//пока оставил, как временную заглушку. редусер определен в методе reduce
 std::function<vec_str(const std::string&)> reduce_func = [&](const std::string& str) {
 	int pref = 1;
 	//std::set<std::string> set;

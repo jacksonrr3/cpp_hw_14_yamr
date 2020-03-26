@@ -2,16 +2,10 @@
 #include "map_reduce.h"
 
 std::function<vec_str(const std::string&)> map_func = [](std::string s) {
-
 	vec_str res;
-	
-	std::cout << s << std::endl;
-	
 	for (std::size_t i = 1; i <= s.size(); i++) {
 		res.push_back(s.substr(0, i));
 	}
-	
-	//res.push_back(s);
 	return res;
 };
 

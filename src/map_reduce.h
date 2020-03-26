@@ -12,10 +12,12 @@
 #include <functional>
 #include <thread>
 #include <iterator>
+#include <utility>
 
 using vec_str = std::vector<std::string>;
-using set_str = std::set<std::string>;
+using set_str = std::multiset<std::string>;
 using vec_thr = std::vector<std::thread>;
+using set_spr = std::multiset<std::pair<std::size_t, std::string>>;
 
 std::mutex console_m;
 std::mutex vector_m;
@@ -27,7 +29,7 @@ class MapReduce {
 	std::string file_path_;
 
 	std::vector<set_str> map_res_;
-	std::vector<set_str> shuffle_res_;
+	std::vector<set_spr> shuffle_res_;
 
 	MapReduce() = delete;
 	MapReduce(const MapReduce&) = delete;
@@ -110,9 +112,10 @@ private:
 		for (std::size_t i = 0; i < m_threads_; i++) {
 			vtr.push_back(std::thread([this, i]() {
 				for (auto& m : map_res_[i]) {
-					std::size_t num = std::hash<std::string>{}(m) % r_threads_;
+					//std::size_t num = std::hash<char>{}(m[0]) % r_threads_;
+					std::size_t num = std::hash<std::size_t>{}(m.size()) % r_threads_;
 					vector_m.lock();
-					shuffle_res_[num].emplace(m);
+					shuffle_res_[num].emplace(m.size(), m);
 					vector_m.unlock();
 				}
 				})
@@ -124,20 +127,33 @@ private:
 		}
 	}
 
-	void reduce(std::function<vec_str(const std::string&)> f) {
+	void reduce(std::function<vec_str(const std::string&)> f_p) {
 		vec_thr vtr;
 		for (std::size_t i = 0; i < r_threads_; i++) {
-			vtr.push_back(std::thread([this, i, f]() {
-				std::string str;
-				for (auto& s : shuffle_res_[i]) {
-					str += (s + "\n");
-				}
-				vec_str red_res{ f(str)};
+			vtr.push_back(std::thread([this, i, f_p]() {
 				std::string file_name = "R" + std::to_string(i) + "_" + std::to_string(file_id++) + ".txt";
 				std::ofstream out_file;
 				out_file.open(file_name);
-				for (auto& v : red_res) {
-					out_file << v << std::endl;
+
+				for (auto it = shuffle_res_[i].begin(); it != shuffle_res_[i].end(); it++){
+
+					//users function object
+					auto f = [&](const std::string& str) {
+						int pref = 0;
+						for (auto jt = shuffle_res_[i].begin(); jt != shuffle_res_[i].end(); jt++){
+							if ((str == jt->second) && (jt != it)) {
+								pref = str.size();
+								break;
+							}
+						}
+						return vec_str{std::to_string(pref)};
+					};
+					vec_str red_res = f(it->second);
+					for (auto& v : red_res) {
+						if (v != "0") {
+							out_file << v << std::endl;
+						}
+					}
 				}
 				out_file.close();
 				})

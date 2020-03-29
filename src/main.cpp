@@ -1,41 +1,35 @@
 #include <iostream>
 #include "map_reduce.h"
 
-std::function<vec_str(const std::string&)> map_func = [](std::string s) {
-	vec_str res;
-	for (std::size_t i = 1; i <= s.size(); i++) {
-		res.push_back(s.substr(0, i));
-	}
-	return res;
-};
-
-
-//пока оставил, как временную заглушку. редусер определен в методе reduce
-std::function<vec_str(const std::string&)> reduce_func = [](const std::string&) {
-	int pref = 1;
-	//std::set<std::string> set;
-	//std::stringstream ss(str);
-	//std::string temp_str;
-	//while (std::getline(ss, temp_str)) {
-	//	set.emplace(temp_str);
-	//}
-	/*
-	if (!str.empty()) {
-		auto first = set.begin();
-		auto second = set.begin();
-		++second;
-		while (second != set.end()) {
-			int diff = std::distance(first->begin(),
-				std::mismatch(first->begin(), first->end(), second->begin(), second->end()).first) + 1;
-			pref = std::max(pref, diff);
-			++first;
-			++second;
+class Mapper {
+public:
+	std::vector<std::string> operator()(const std::string& s) {
+		vec_str res;
+		for (std::size_t i = 1; i <= s.size(); i++) {
+			res.push_back(s.substr(0, i));
 		}
+		return res;
 	}
-	*/
-	//return std::to_string(pref);
-	return vec_str{ std::to_string(pref) };
 };
+
+class Reducer {
+	std::string pred = "";
+	std::size_t count = 0;
+public:
+	std::vector<std::string> operator()(const std::string& s) {
+		vec_str res;
+		if (s == pred) {
+			count = std::max(count, s.size());
+			res.push_back(std::to_string(count));
+		}
+		else {
+			pred = s;
+		//	res.push_back(std::to_string(count));
+		}
+		return res;
+	}
+};
+
 
 int main(int args, char* argv[]) {
 
@@ -53,8 +47,10 @@ int main(int args, char* argv[]) {
 		return EXIT_FAILURE;
 	}
 
-	MapReduce m(mnum, rnum, src);
-	m.run(map_func, reduce_func);
+	std::function<vec_str(const std::string&)> mf = Mapper();
+
+	MapReduce<Mapper, Reducer> m(mnum, rnum, src);
+	m.run(/*mf, reduce_func*/);
 
 	return 0;
 }

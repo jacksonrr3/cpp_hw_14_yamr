@@ -23,13 +23,15 @@ std::mutex console_m;
 std::mutex vector_m;
 static std::atomic_int file_id = 11;
 
+
+template <typename M, typename R>
 class MapReduce {
 	std::size_t m_threads_;
 	std::size_t r_threads_;
 	std::string file_path_;
 
 	std::vector<set_str> map_res_;
-	std::vector<set_spr> shuffle_res_;
+	std::vector<set_str> shuffle_res_;
 
 	MapReduce() = delete;
 	MapReduce(const MapReduce&) = delete;
@@ -38,11 +40,11 @@ public:
 	MapReduce(std::size_t m, std::size_t r, const std::string& path) :
 		m_threads_(m), r_threads_(r), file_path_(path) {}
 
-	void run(std::function<vec_str(const std::string&)> m_f, std::function<vec_str(const std::string&)> r_f) {
+	void run(/*M m_f, R r_f*/) {
 		auto v = split_file();
-		map(v, m_f);
+		map(v/*, m_f*/);
 		shuffle();
-		reduce(r_f);
+		reduce(/*r_f*/);
 	}
 
 private:
@@ -75,21 +77,22 @@ private:
 		return offsets;
 	}
 
-	void map(std::vector<std::size_t> off, std::function<vec_str(const std::string&)> f) {
+	void map(std::vector<std::size_t> off/*, std::function<vec_str(const std::string&)> f*/) {
 		vec_thr vtr;
 		for (std::size_t i = 0; i < m_threads_; i++) {
-			vtr.push_back(std::thread([this, f](int from, int to) {
+			vtr.push_back(std::thread([this/*, f*/](int from, int to) {
 				std::ifstream file;
 				file.open(file_path_);
 				file.seekg(from, file.beg);
 				char c = file.peek();
 				if (c == '\n') { ++from; file.seekg(from, file.beg); }
 				set_str thread_res;
+				M m;
 				while (from < to) {
 					std::string str;
 					std::getline(file, str);
 					from += str.size() + 2;
-					auto v(f(str));
+					auto v = m(str);
 					thread_res.insert(v.begin(), v.end());
 				}
 				file.close();
@@ -112,10 +115,10 @@ private:
 		for (std::size_t i = 0; i < m_threads_; i++) {
 			vtr.push_back(std::thread([this, i]() {
 				for (auto& m : map_res_[i]) {
-					//std::size_t num = std::hash<char>{}(m[0]) % r_threads_;
-					std::size_t num = std::hash<std::size_t>{}(m.size()) % r_threads_;
+					std::size_t num = std::hash<std::string>{}(m) % r_threads_;
+					//std::size_t num = std::hash<std::size_t>{}(m.size()) % r_threads_;
 					vector_m.lock();
-					shuffle_res_[num].emplace(m.size(), m);
+					shuffle_res_[num].emplace(m);
 					vector_m.unlock();
 				}
 				})
@@ -127,32 +130,19 @@ private:
 		}
 	}
 
-	void reduce(std::function<vec_str(const std::string&)> f_p) {
+	void reduce(/*std::function<vec_str(const std::string&)> f_p*/) {
 		vec_thr vtr;
 		for (std::size_t i = 0; i < r_threads_; i++) {
-			vtr.push_back(std::thread([this, i, f_p]() {
+			vtr.push_back(std::thread([this, i/*, f_p*/]() {
 				std::string file_name = "R" + std::to_string(i) + "_" + std::to_string(file_id++) + ".txt";
 				std::ofstream out_file;
 				out_file.open(file_name);
+				R r;
+				for (auto it : shuffle_res_[i]) {
 
-				for (auto it = shuffle_res_[i].begin(); it != shuffle_res_[i].end(); it++){
-
-					//users function object
-					auto f = [&](const std::string& str) {
-						int pref = 0;
-						for (auto jt = shuffle_res_[i].begin(); jt != shuffle_res_[i].end(); jt++){
-							if ((str == jt->second) && (jt != it)) {
-								pref = str.size();
-								break;
-							}
-						}
-						return vec_str{std::to_string(pref)};
-					};
-					vec_str red_res = f(it->second);
+					vec_str red_res = r(it);
 					for (auto& v : red_res) {
-						if (v != "0") {
 							out_file << v << std::endl;
-						}
 					}
 				}
 				out_file.close();
